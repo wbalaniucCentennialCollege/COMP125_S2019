@@ -1,4 +1,4 @@
-/*  JavaScript 6th Edition
+﻿/*  JavaScript 6th Edition
     Chapter 11
     Chapter case
 
@@ -22,56 +22,77 @@ var httpRequest = false;
 //////
 
 function getRequestObject() {
-   try {
-      httpRequest = new XMLHttpRequest();
-   }
-   catch (requestError) {
-      document.querySelector("p.error").innerHTML = "Forecast not supported by your browser."
-      document.querySelector("p.error").style.display = "block";
-      return false;
-   }
+    try {
+        httpRequest = new XMLHttpRequest();
+    }
+    catch (requestError) {
+        document.querySelector("p.error").innerHTML = "Forecast not supported by your browser."
+        document.querySelector("p.error").style.display = "block";
+        return false;
+    }
 
-   return httpRequest;
+    return httpRequest;
 }
 
 function getWeather(evt) {
-   var latitude;
-   var longitude;
-   if (evt.type !== "load") {
-      if (evt.target) {
-         selectedCity = evt.target.innerHTML;
-      } else if (evt.srcElement) {
-         selectedCity = evt.srcElement.innerHTML;
-      }
-   }
-   if (selectedCity === "Tucson, AZ") {
-      latitude = 37.7577;
-      longitude = -122.4376;
-   } else if (selectedCity === "Chicago, IL") {
-      latitude = 41.8337329;
-      longitude = -87.7321555;
-   } else if (selectedCity === "Montreal, QC") {
-      latitude = 45.5601062;
-      longitude = -73.7120832;
-   }
+    var latitude;
+    var longitude;
+    if (evt.type !== "load") {
+        if (evt.target) {
+            selectedCity = evt.target.innerHTML;
+        } else if (evt.srcElement) {
+            selectedCity = evt.srcElement.innerHTML;
+        }
+    }
+    if (selectedCity === "Tucson, AZ") {
+        latitude = 37.7577;
+        longitude = -122.4376;
+    } else if (selectedCity === "Chicago, IL") {
+        latitude = 41.8337329;
+        longitude = -87.7321555;
+    } else if (selectedCity === "Montreal, QC") {
+        latitude = 45.5601062;
+        longitude = -73.7120832;
+    }
+    /*
 
-   ///////////////
-   if(!httpRequest) {
-      httpRequest = getRequestObject();
-   }
+    ///////////////
+    if (!httpRequest) {
+        httpRequest = getRequestObject();
+    }
 
-   httpRequest.abort(); // Cancal any existing HTTP request before beginning a new one.
-   // Opens new HTTP Request. Specifies GET as method type. Concats solar.php with lat and lng. Async enabled
-   httpRequest.open("get", "solar.php?" + "lat=" + latitude + "&lng=" + longitude, true);
-   httpRequest.send(null); // Specifies request body as null
+    httpRequest.abort(); // Cancal any existing HTTP request before beginning a new one.
+    // Opens new HTTP Request. Specifies GET as method type. Concats solar.php with lat and lng. Async enabled
+    httpRequest.open("get", "solar.php?" + "lat=" + latitude + "&lng=" + longitude, true);
+    httpRequest.send(null); // Specifies request body as null
 
-   httpRequest.onreadystatechange = fillWeather; // Callback. () not needed.
+    httpRequest.onreadystatechange = fillWeather; // Callback. () not needed.
+    */
+
+    var url = "https://api.darksky.net/forecast/4ae2ae084941b80a1a5eeb226a3151e1/" + latitude + ", " + longitude + "?callback=getForecast";
+
+    var script = document.createElement("script");
+    script.id = "jsonp";
+    script.src = url;
+    document.body.appendChild(script);
 }
 
-function fillWeather() {
-   if(httpRequest.readyState === 4 && httpRequest.status === 200) {
-      weatherReport = JSON.parse(httpRequest.responseText);  
-   }
+function getForecast(forecast) {
+    try {
+        fillWeather(forecast);
+    }
+    finally {
+        var script = document.getElementById("jsonp");
+        script.parentNode.removeChild(script);
+    }
+}
+
+function fillWeather(weatherReport) {
+    /*
+    if (httpRequest.readyState === 4 && httpRequest.status === 200) {
+        weatherReport = JSON.parse(httpRequest.responseText);
+    }
+    */
 
     var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     var dateValue = new Date(weatherReport.daily.data[0].time);
@@ -130,14 +151,14 @@ function fillWeather() {
 
 var locations = document.querySelectorAll("section ul li");
 for (var i = 0; i < locations.length; i++) {
-   if (locations[i].addEventListener) {
-      locations[i].addEventListener("click", getWeather, false);
-   } else if (locations[i].attachEvent) {
-      locations[i].attachEvent("onclick", getWeather);
-   }
+    if (locations[i].addEventListener) {
+        locations[i].addEventListener("click", getWeather, false);
+    } else if (locations[i].attachEvent) {
+        locations[i].attachEvent("onclick", getWeather);
+    }
 }
 if (window.addEventListener) {
-   window.addEventListener("load", getWeather, false);
+    window.addEventListener("load", getWeather, false);
 } else if (window.attachEvent) {
-   window.attachEvent("onload", getWeather);
+    window.attachEvent("onload", getWeather);
 }
